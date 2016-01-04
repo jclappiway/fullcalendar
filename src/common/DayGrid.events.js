@@ -39,6 +39,19 @@ DayGrid.mixin({
 
 		// render an `.el` on each seg
 		// returns a subset of the segs. segs that were actually rendered
+		var days = this.el.find('.fc-day-number');
+
+		for (var i = segs.length - 1; i >= 0; i--) {
+			var cell = segs[i];
+			if(cell.leftCol == cell.rightCol){
+				days.eq(cell.row * this.colCnt + cell.leftCol).addClass('fc-event-present');
+			}else{
+				for (var i = cell.rightCol; i >= cell.leftCol; i--) {
+					days.eq(cell.row * this.colCnt + i).addClass('fc-event-present');
+				};
+			}
+		};
+
 		segs = this.renderFgSegEls(segs);
 
 		rowStructs = this.rowStructs = this.renderSegRows(segs);
@@ -117,7 +130,7 @@ DayGrid.mixin({
 			'<span class="fc-title">' +
 				(htmlEscape(event.title || '') || '&nbsp;') + // we always want one line of height
 			'</span>';
-		
+
 		return '<a class="' + classes.join(' ') + '"' +
 				(event.url ?
 					' href="' + htmlEscape(event.url) + '"' :
@@ -246,7 +259,7 @@ DayGrid.mixin({
 		// Give preference to elements with certain criteria, so they have
 		// a chance to be closer to the top.
 		this.sortEventSegs(segs);
-		
+
 		for (i = 0; i < segs.length; i++) {
 			seg = segs[i];
 

@@ -147,7 +147,9 @@ var DayGrid = FC.DayGrid = Grid.extend(DayTableMixin, {
 
 		return '' +
 			'<td class="' + classes.join(' ') + '" data-date="' + date.format() + '">' +
-				date.date() +
+				'<span>'+
+					date.date() +
+				'</span>'+
 			'</td>';
 	},
 

@@ -17,7 +17,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('grunt-bump');
 	grunt.loadNpmTasks('lumbar');
-	
+
 	// This will eventually get passed to grunt.initConfig()
 	// Initialize multitasks...
 	var config = {

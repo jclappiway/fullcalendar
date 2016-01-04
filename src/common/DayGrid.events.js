@@ -44,9 +44,10 @@ DayGrid.mixin({
 		for (var i = segs.length - 1; i >= 0; i--) {
 			var cell = segs[i];
 			if(cell.leftCol == cell.rightCol){
-				days.eq(cell.row * this.colCnt + cell.leftCol).addClass('fc-event-present');
+				days.eq(cell.row * this.colCnt + cell.leftCol).addClass('fc-event-present one-day');
 			}else{
 				for (var i = cell.rightCol; i >= cell.leftCol; i--) {
+					if(cell.)
 					days.eq(cell.row * this.colCnt + i).addClass('fc-event-present');
 				};
 			}

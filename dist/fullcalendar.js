@@ -53,7 +53,7 @@ $.fn.fullCalendar = function(options) {
 			calendar.render();
 		}
 	});
-
+	
 	return res;
 };
 
@@ -181,7 +181,7 @@ function enableCursor() {
 
 // Given a total available height to fill, have `els` (essentially child rows) expand to accomodate.
 // By default, all elements that are shorter than the recommended height are expanded uniformly, not considering
-// any other els that are already too tall. if `shouldRedistribute` is on, it considers these tall rows and
+// any other els that are already too tall. if `shouldRedistribute` is on, it considers these tall rows and 
 // reduces the available height.
 function distributeHeight(els, availableHeight, shouldRedistribute) {
 
@@ -4670,7 +4670,7 @@ var DayTableMixin = FC.DayTableMixin = {
 		this.dayIndices = dayIndices;
 		this.daysPerRow = daysPerRow;
 		this.rowCnt = rowCnt;
-
+		
 		this.updateDayTableCols();
 	},
 
@@ -5433,343 +5433,341 @@ var DayGrid = FC.DayGrid = Grid.extend(DayTableMixin, {
 });
 
 ;;
-
 /* Event-rendering methods for the DayGrid class
 ----------------------------------------------------------------------------------------------------------------------*/
 
 DayGrid.mixin({
 
-	rowStructs: null, // an array of objects, each holding information about a row's foreground event-rendering
+    rowStructs: null, // an array of objects, each holding information about a row's foreground event-rendering
 
 
-	// Unrenders all events currently rendered on the grid
-	unrenderEvents: function() {
-		this.removeSegPopover(); // removes the "more.." events popover
-		Grid.prototype.unrenderEvents.apply(this, arguments); // calls the super-method
-	},
+    // Unrenders all events currently rendered on the grid
+    unrenderEvents: function() {
+        this.removeSegPopover(); // removes the "more.." events popover
+        Grid.prototype.unrenderEvents.apply(this, arguments); // calls the super-method
+    },
 
 
-	// Retrieves all rendered segment objects currently rendered on the grid
-	getEventSegs: function() {
-		return Grid.prototype.getEventSegs.call(this) // get the segments from the super-method
-			.concat(this.popoverSegs || []); // append the segments from the "more..." popover
-	},
+    // Retrieves all rendered segment objects currently rendered on the grid
+    getEventSegs: function() {
+        return Grid.prototype.getEventSegs.call(this) // get the segments from the super-method
+            .concat(this.popoverSegs || []); // append the segments from the "more..." popover
+    },
 
 
-	// Renders the given background event segments onto the grid
-	renderBgSegs: function(segs) {
+    // Renders the given background event segments onto the grid
+    renderBgSegs: function(segs) {
 
-		// don't render timed background events
-		var allDaySegs = $.grep(segs, function(seg) {
-			return seg.event.allDay;
-		});
+        // don't render timed background events
+        var allDaySegs = $.grep(segs, function(seg) {
+            return seg.event.allDay;
+        });
 
-		return Grid.prototype.renderBgSegs.call(this, allDaySegs); // call the super-method
-	},
-
-
-	// Renders the given foreground event segments onto the grid
-	renderFgSegs: function(segs) {
-		var rowStructs;
-
-		// render an `.el` on each seg
-		// returns a subset of the segs. segs that were actually rendered
-		var days = this.el.find('.fc-day-number');
-
-		for (var i = segs.length - 1; i >= 0; i--) {
-			var cell = segs[i];
-			if(cell.leftCol == cell.rightCol){
-				days.eq(cell.row * this.colCnt + cell.leftCol).addClass('fc-event-present fc-event-one-day');
-			}else{
-				for (var j = cell.rightCol; j >= cell.leftCol; j--) {
-					var klass = 'fc-event-present';
-					if(cell.leftCol == j){
-						klass += ' fc-event-start';
-					}
-
-					if(cell.rightCol == j){
-						klass += ' fc-event-end';
-					}
-
-					days.eq(cell.row * this.colCnt + j).addClass(klass);
-				};
-			}
-		};
-
-		// segs = this.renderFgSegEls(segs);
-
-		// rowStructs = this.rowStructs = this.renderSegRows(segs);
-
-		// // append to each row's content skeleton
-		// this.rowEls.each(function(i, rowNode) {
-		// 	$(rowNode).find('.fc-content-skeleton > table').append(
-		// 		rowStructs[i].tbodyEl
-		// 	);
-		// });
-
-		return segs; // return only the segs that were actually rendered
-	},
+        return Grid.prototype.renderBgSegs.call(this, allDaySegs); // call the super-method
+    },
 
 
-	// Unrenders all currently rendered foreground event segments
-	unrenderFgSegs: function() {
-		var rowStructs = this.rowStructs || [];
-		var rowStruct;
+    // Renders the given foreground event segments onto the grid
+    renderFgSegs: function(segs) {
+        var rowStructs;
 
-		while ((rowStruct = rowStructs.pop())) {
-			rowStruct.tbodyEl.remove();
-		}
+        // render an `.el` on each seg
+        // returns a subset of the segs. segs that were actually rendered
+        var days = this.el.find('.fc-day-number');
 
-		this.rowStructs = null;
-	},
+        for (var i = segs.length - 1; i >= 0; i--) {
+            var cell = segs[i];
+            if (cell.leftCol == cell.rightCol) {
+                days.eq(cell.row * this.colCnt + cell.leftCol).addClass('fc-event-present fc-event-one-day');
+            } else {
+                for (var j = cell.rightCol; j >= cell.leftCol; j--) {
+                    var klass = 'fc-event-present';
+                    klass += ' ' + cell.event.className.join(' ');
+                    if (cell.leftCol == j) {
+                        klass += ' fc-event-start';
+                    }
 
+                    if (cell.rightCol == j) {
+                        klass += ' fc-event-end';
+                    }
 
-	// Uses the given events array to generate <tbody> elements that should be appended to each row's content skeleton.
-	// Returns an array of rowStruct objects (see the bottom of `renderSegRow`).
-	// PRECONDITION: each segment shoud already have a rendered and assigned `.el`
-	renderSegRows: function(segs) {
-		var rowStructs = [];
-		var segRows;
-		var row;
+                    days.eq(cell.row * this.colCnt + j).addClass(klass);
+                };
+            }
+        };
 
-		segRows = this.groupSegRows(segs); // group into nested arrays
+        // segs = this.renderFgSegEls(segs);
 
-		// iterate each row of segment groupings
-		for (row = 0; row < segRows.length; row++) {
-			rowStructs.push(
-				this.renderSegRow(row, segRows[row])
-			);
-		}
+        // rowStructs = this.rowStructs = this.renderSegRows(segs);
 
-		return rowStructs;
-	},
+        // // append to each row's content skeleton
+        // this.rowEls.each(function(i, rowNode) {
+        // 	$(rowNode).find('.fc-content-skeleton > table').append(
+        // 		rowStructs[i].tbodyEl
+        // 	);
+        // });
 
-
-	// Builds the HTML to be used for the default element for an individual segment
-	fgSegHtml: function(seg, disableResizing) {
-		var view = this.view;
-		var event = seg.event;
-		var isDraggable = view.isEventDraggable(event);
-		var isResizableFromStart = !disableResizing && event.allDay &&
-			seg.isStart && view.isEventResizableFromStart(event);
-		var isResizableFromEnd = !disableResizing && event.allDay &&
-			seg.isEnd && view.isEventResizableFromEnd(event);
-		var classes = this.getSegClasses(seg, isDraggable, isResizableFromStart || isResizableFromEnd);
-		var skinCss = cssToStr(this.getEventSkinCss(event));
-		var timeHtml = '';
-		var timeText;
-		var titleHtml;
-
-		classes.unshift('fc-day-grid-event', 'fc-h-event');
-
-		// Only display a timed events time if it is the starting segment
-		if (seg.isStart) {
-			timeText = this.getEventTimeText(event);
-			if (timeText) {
-				timeHtml = '<span class="fc-time">' + htmlEscape(timeText) + '</span>';
-			}
-		}
-
-		titleHtml =
-			'<span class="fc-title">' +
-				(htmlEscape(event.title || '') || '&nbsp;') + // we always want one line of height
-			'</span>';
-
-		return '<a class="' + classes.join(' ') + '"' +
-				(event.url ?
-					' href="' + htmlEscape(event.url) + '"' :
-					''
-					) +
-				(skinCss ?
-					' style="' + skinCss + '"' :
-					''
-					) +
-			'>' +
-				'<div class="fc-content">' +
-					(this.isRTL ?
-						titleHtml + ' ' + timeHtml : // put a natural space in between
-						timeHtml + ' ' + titleHtml   //
-						) +
-				'</div>' +
-				(isResizableFromStart ?
-					'<div class="fc-resizer fc-start-resizer" />' :
-					''
-					) +
-				(isResizableFromEnd ?
-					'<div class="fc-resizer fc-end-resizer" />' :
-					''
-					) +
-			'</a>';
-	},
+        return segs; // return only the segs that were actually rendered
+    },
 
 
-	// Given a row # and an array of segments all in the same row, render a <tbody> element, a skeleton that contains
-	// the segments. Returns object with a bunch of internal data about how the render was calculated.
-	// NOTE: modifies rowSegs
-	renderSegRow: function(row, rowSegs) {
-		var colCnt = this.colCnt;
-		var segLevels = this.buildSegLevels(rowSegs); // group into sub-arrays of levels
-		var levelCnt = Math.max(1, segLevels.length); // ensure at least one level
-		var tbody = $('<tbody/>');
-		var segMatrix = []; // lookup for which segments are rendered into which level+col cells
-		var cellMatrix = []; // lookup for all <td> elements of the level+col matrix
-		var loneCellMatrix = []; // lookup for <td> elements that only take up a single column
-		var i, levelSegs;
-		var col;
-		var tr;
-		var j, seg;
-		var td;
+    // Unrenders all currently rendered foreground event segments
+    unrenderFgSegs: function() {
+        var rowStructs = this.rowStructs || [];
+        var rowStruct;
 
-		// populates empty cells from the current column (`col`) to `endCol`
-		function emptyCellsUntil(endCol) {
-			while (col < endCol) {
-				// try to grab a cell from the level above and extend its rowspan. otherwise, create a fresh cell
-				td = (loneCellMatrix[i - 1] || [])[col];
-				if (td) {
-					td.attr(
-						'rowspan',
-						parseInt(td.attr('rowspan') || 1, 10) + 1
-					);
-				}
-				else {
-					td = $('<td/>');
-					tr.append(td);
-				}
-				cellMatrix[i][col] = td;
-				loneCellMatrix[i][col] = td;
-				col++;
-			}
-		}
+        while ((rowStruct = rowStructs.pop())) {
+            rowStruct.tbodyEl.remove();
+        }
 
-		for (i = 0; i < levelCnt; i++) { // iterate through all levels
-			levelSegs = segLevels[i];
-			col = 0;
-			tr = $('<tr/>');
-
-			segMatrix.push([]);
-			cellMatrix.push([]);
-			loneCellMatrix.push([]);
-
-			// levelCnt might be 1 even though there are no actual levels. protect against this.
-			// this single empty row is useful for styling.
-			if (levelSegs) {
-				for (j = 0; j < levelSegs.length; j++) { // iterate through segments in level
-					seg = levelSegs[j];
-
-					emptyCellsUntil(seg.leftCol);
-
-					// create a container that occupies or more columns. append the event element.
-					td = $('<td class="fc-event-container"/>').append(seg.el);
-					if (seg.leftCol != seg.rightCol) {
-						td.attr('colspan', seg.rightCol - seg.leftCol + 1);
-					}
-					else { // a single-column segment
-						loneCellMatrix[i][col] = td;
-					}
-
-					while (col <= seg.rightCol) {
-						cellMatrix[i][col] = td;
-						segMatrix[i][col] = seg;
-						col++;
-					}
-
-					tr.append(td);
-				}
-			}
-
-			emptyCellsUntil(colCnt); // finish off the row
-			this.bookendCells(tr);
-			tbody.append(tr);
-		}
-
-		return { // a "rowStruct"
-			row: row, // the row number
-			tbodyEl: tbody,
-			cellMatrix: cellMatrix,
-			segMatrix: segMatrix,
-			segLevels: segLevels,
-			segs: rowSegs
-		};
-	},
+        this.rowStructs = null;
+    },
 
 
-	// Stacks a flat array of segments, which are all assumed to be in the same row, into subarrays of vertical levels.
-	// NOTE: modifies segs
-	buildSegLevels: function(segs) {
-		var levels = [];
-		var i, seg;
-		var j;
+    // Uses the given events array to generate <tbody> elements that should be appended to each row's content skeleton.
+    // Returns an array of rowStruct objects (see the bottom of `renderSegRow`).
+    // PRECONDITION: each segment shoud already have a rendered and assigned `.el`
+    renderSegRows: function(segs) {
+        var rowStructs = [];
+        var segRows;
+        var row;
 
-		// Give preference to elements with certain criteria, so they have
-		// a chance to be closer to the top.
-		this.sortEventSegs(segs);
+        segRows = this.groupSegRows(segs); // group into nested arrays
 
-		for (i = 0; i < segs.length; i++) {
-			seg = segs[i];
+        // iterate each row of segment groupings
+        for (row = 0; row < segRows.length; row++) {
+            rowStructs.push(
+                this.renderSegRow(row, segRows[row])
+            );
+        }
 
-			// loop through levels, starting with the topmost, until the segment doesn't collide with other segments
-			for (j = 0; j < levels.length; j++) {
-				if (!isDaySegCollision(seg, levels[j])) {
-					break;
-				}
-			}
-			// `j` now holds the desired subrow index
-			seg.level = j;
-
-			// create new level array if needed and append segment
-			(levels[j] || (levels[j] = [])).push(seg);
-		}
-
-		// order segments left-to-right. very important if calendar is RTL
-		for (j = 0; j < levels.length; j++) {
-			levels[j].sort(compareDaySegCols);
-		}
-
-		return levels;
-	},
+        return rowStructs;
+    },
 
 
-	// Given a flat array of segments, return an array of sub-arrays, grouped by each segment's row
-	groupSegRows: function(segs) {
-		var segRows = [];
-		var i;
+    // Builds the HTML to be used for the default element for an individual segment
+    fgSegHtml: function(seg, disableResizing) {
+        var view = this.view;
+        var event = seg.event;
+        var isDraggable = view.isEventDraggable(event);
+        var isResizableFromStart = !disableResizing && event.allDay &&
+            seg.isStart && view.isEventResizableFromStart(event);
+        var isResizableFromEnd = !disableResizing && event.allDay &&
+            seg.isEnd && view.isEventResizableFromEnd(event);
+        var classes = this.getSegClasses(seg, isDraggable, isResizableFromStart || isResizableFromEnd);
+        var skinCss = cssToStr(this.getEventSkinCss(event));
+        var timeHtml = '';
+        var timeText;
+        var titleHtml;
 
-		for (i = 0; i < this.rowCnt; i++) {
-			segRows.push([]);
-		}
+        classes.unshift('fc-day-grid-event', 'fc-h-event');
 
-		for (i = 0; i < segs.length; i++) {
-			segRows[segs[i].row].push(segs[i]);
-		}
+        // Only display a timed events time if it is the starting segment
+        if (seg.isStart) {
+            timeText = this.getEventTimeText(event);
+            if (timeText) {
+                timeHtml = '<span class="fc-time">' + htmlEscape(timeText) + '</span>';
+            }
+        }
 
-		return segRows;
-	}
+        titleHtml =
+            '<span class="fc-title">' +
+            (htmlEscape(event.title || '') || '&nbsp;') + // we always want one line of height
+            '</span>';
+
+        return '<a class="' + classes.join(' ') + '"' +
+            (event.url ?
+                ' href="' + htmlEscape(event.url) + '"' :
+                ''
+            ) +
+            (skinCss ?
+                ' style="' + skinCss + '"' :
+                ''
+            ) +
+            '>' +
+            '<div class="fc-content">' +
+            (this.isRTL ?
+                titleHtml + ' ' + timeHtml : // put a natural space in between
+                timeHtml + ' ' + titleHtml //
+            ) +
+            '</div>' +
+            (isResizableFromStart ?
+                '<div class="fc-resizer fc-start-resizer" />' :
+                ''
+            ) +
+            (isResizableFromEnd ?
+                '<div class="fc-resizer fc-end-resizer" />' :
+                ''
+            ) +
+            '</a>';
+    },
+
+
+    // Given a row # and an array of segments all in the same row, render a <tbody> element, a skeleton that contains
+    // the segments. Returns object with a bunch of internal data about how the render was calculated.
+    // NOTE: modifies rowSegs
+    renderSegRow: function(row, rowSegs) {
+        var colCnt = this.colCnt;
+        var segLevels = this.buildSegLevels(rowSegs); // group into sub-arrays of levels
+        var levelCnt = Math.max(1, segLevels.length); // ensure at least one level
+        var tbody = $('<tbody/>');
+        var segMatrix = []; // lookup for which segments are rendered into which level+col cells
+        var cellMatrix = []; // lookup for all <td> elements of the level+col matrix
+        var loneCellMatrix = []; // lookup for <td> elements that only take up a single column
+        var i, levelSegs;
+        var col;
+        var tr;
+        var j, seg;
+        var td;
+
+        // populates empty cells from the current column (`col`) to `endCol`
+        function emptyCellsUntil(endCol) {
+            while (col < endCol) {
+                // try to grab a cell from the level above and extend its rowspan. otherwise, create a fresh cell
+                td = (loneCellMatrix[i - 1] || [])[col];
+                if (td) {
+                    td.attr(
+                        'rowspan',
+                        parseInt(td.attr('rowspan') || 1, 10) + 1
+                    );
+                } else {
+                    td = $('<td/>');
+                    tr.append(td);
+                }
+                cellMatrix[i][col] = td;
+                loneCellMatrix[i][col] = td;
+                col++;
+            }
+        }
+
+        for (i = 0; i < levelCnt; i++) { // iterate through all levels
+            levelSegs = segLevels[i];
+            col = 0;
+            tr = $('<tr/>');
+
+            segMatrix.push([]);
+            cellMatrix.push([]);
+            loneCellMatrix.push([]);
+
+            // levelCnt might be 1 even though there are no actual levels. protect against this.
+            // this single empty row is useful for styling.
+            if (levelSegs) {
+                for (j = 0; j < levelSegs.length; j++) { // iterate through segments in level
+                    seg = levelSegs[j];
+
+                    emptyCellsUntil(seg.leftCol);
+
+                    // create a container that occupies or more columns. append the event element.
+                    td = $('<td class="fc-event-container"/>').append(seg.el);
+                    if (seg.leftCol != seg.rightCol) {
+                        td.attr('colspan', seg.rightCol - seg.leftCol + 1);
+                    } else { // a single-column segment
+                        loneCellMatrix[i][col] = td;
+                    }
+
+                    while (col <= seg.rightCol) {
+                        cellMatrix[i][col] = td;
+                        segMatrix[i][col] = seg;
+                        col++;
+                    }
+
+                    tr.append(td);
+                }
+            }
+
+            emptyCellsUntil(colCnt); // finish off the row
+            this.bookendCells(tr);
+            tbody.append(tr);
+        }
+
+        return { // a "rowStruct"
+            row: row, // the row number
+            tbodyEl: tbody,
+            cellMatrix: cellMatrix,
+            segMatrix: segMatrix,
+            segLevels: segLevels,
+            segs: rowSegs
+        };
+    },
+
+
+    // Stacks a flat array of segments, which are all assumed to be in the same row, into subarrays of vertical levels.
+    // NOTE: modifies segs
+    buildSegLevels: function(segs) {
+        var levels = [];
+        var i, seg;
+        var j;
+
+        // Give preference to elements with certain criteria, so they have
+        // a chance to be closer to the top.
+        this.sortEventSegs(segs);
+
+        for (i = 0; i < segs.length; i++) {
+            seg = segs[i];
+
+            // loop through levels, starting with the topmost, until the segment doesn't collide with other segments
+            for (j = 0; j < levels.length; j++) {
+                if (!isDaySegCollision(seg, levels[j])) {
+                    break;
+                }
+            }
+            // `j` now holds the desired subrow index
+            seg.level = j;
+
+            // create new level array if needed and append segment
+            (levels[j] || (levels[j] = [])).push(seg);
+        }
+
+        // order segments left-to-right. very important if calendar is RTL
+        for (j = 0; j < levels.length; j++) {
+            levels[j].sort(compareDaySegCols);
+        }
+
+        return levels;
+    },
+
+
+    // Given a flat array of segments, return an array of sub-arrays, grouped by each segment's row
+    groupSegRows: function(segs) {
+        var segRows = [];
+        var i;
+
+        for (i = 0; i < this.rowCnt; i++) {
+            segRows.push([]);
+        }
+
+        for (i = 0; i < segs.length; i++) {
+            segRows[segs[i].row].push(segs[i]);
+        }
+
+        return segRows;
+    }
 
 });
 
 
 // Computes whether two segments' columns collide. They are assumed to be in the same row.
 function isDaySegCollision(seg, otherSegs) {
-	var i, otherSeg;
+    var i, otherSeg;
 
-	for (i = 0; i < otherSegs.length; i++) {
-		otherSeg = otherSegs[i];
+    for (i = 0; i < otherSegs.length; i++) {
+        otherSeg = otherSegs[i];
 
-		if (
-			otherSeg.leftCol <= seg.rightCol &&
-			otherSeg.rightCol >= seg.leftCol
-		) {
-			return true;
-		}
-	}
+        if (
+            otherSeg.leftCol <= seg.rightCol &&
+            otherSeg.rightCol >= seg.leftCol
+        ) {
+            return true;
+        }
+    }
 
-	return false;
+    return false;
 }
 
 
 // A cmp function for determining the leftmost event
 function compareDaySegCols(a, b) {
-	return a.leftCol - b.leftCol;
+    return a.leftCol - b.leftCol;
 }
 
 ;;
@@ -8622,7 +8620,7 @@ function Calendar_constructor(element, overrides) {
 	t.initOptions(overrides || {});
 	var options = this.options;
 
-
+	
 	// Exports
 	// -----------------------------------------------------------------------------------
 
@@ -8811,7 +8809,7 @@ function Calendar_constructor(element, overrides) {
 	};
 
 
-
+	
 	// Imports
 	// -----------------------------------------------------------------------------------
 
@@ -8838,9 +8836,9 @@ function Calendar_constructor(element, overrides) {
 	var ignoreWindowResize = 0;
 	var events = [];
 	var date; // unzoned
-
-
-
+	
+	
+	
 	// Main Rendering
 	// -----------------------------------------------------------------------------------
 
@@ -8852,8 +8850,8 @@ function Calendar_constructor(element, overrides) {
 	else {
 		date = t.getNow(); // getNow already returns unzoned
 	}
-
-
+	
+	
 	function render() {
 		if (!content) {
 			initialRender();
@@ -8864,8 +8862,8 @@ function Calendar_constructor(element, overrides) {
 			renderView();
 		}
 	}
-
-
+	
+	
 	function initialRender() {
 		tm = options.theme ? 'ui' : 'fc';
 		element.addClass('fc');
@@ -8899,8 +8897,8 @@ function Calendar_constructor(element, overrides) {
 			$(window).resize(windowResizeProxy);
 		}
 	}
-
-
+	
+	
 	function destroy() {
 
 		if (currentView) {
@@ -8918,13 +8916,13 @@ function Calendar_constructor(element, overrides) {
 			$(window).unbind('resize', windowResizeProxy);
 		}
 	}
-
-
+	
+	
 	function elementVisible() {
 		return element.is(':visible');
 	}
-
-
+	
+	
 
 	// View Rendering
 	// -----------------------------------------------------------------------------------
@@ -8983,7 +8981,7 @@ function Calendar_constructor(element, overrides) {
 		ignoreWindowResize--;
 	}
 
-
+	
 
 	// Resizing
 	// -----------------------------------------------------------------------------------
@@ -9000,8 +8998,8 @@ function Calendar_constructor(element, overrides) {
 	t.isHeightAuto = function() {
 		return options.contentHeight === 'auto' || options.height === 'auto';
 	};
-
-
+	
+	
 	function updateSize(shouldRecalc) {
 		if (elementVisible()) {
 
@@ -9023,8 +9021,8 @@ function Calendar_constructor(element, overrides) {
 			_calcSize();
 		}
 	}
-
-
+	
+	
 	function _calcSize() { // assumes elementVisible
 		if (typeof options.contentHeight === 'number') { // exists and not 'auto'
 			suggestedViewHeight = options.contentHeight;
@@ -9036,8 +9034,8 @@ function Calendar_constructor(element, overrides) {
 			suggestedViewHeight = Math.round(content.width() / Math.max(options.aspectRatio, .5));
 		}
 	}
-
-
+	
+	
 	function windowResize(ev) {
 		if (
 			!ignoreWindowResize &&
@@ -9049,9 +9047,9 @@ function Calendar_constructor(element, overrides) {
 			}
 		}
 	}
-
-
-
+	
+	
+	
 	/* Event Fetching/Rendering
 	-----------------------------------------------------------------------------*/
 	// TODO: going forward, most of this stuff should be directly handled by the view
@@ -9077,7 +9075,7 @@ function Calendar_constructor(element, overrides) {
 		currentView.clearEvents();
 		unfreezeContentHeight();
 	}
-
+	
 
 	function getAndRenderEvents() {
 		if (!options.lazyFetching || isFetchNeeded(currentView.start, currentView.end)) {
@@ -9095,7 +9093,7 @@ function Calendar_constructor(element, overrides) {
 			// ... which will call renderEvents
 	}
 
-
+	
 	// called when event data arrives
 	function reportEvents(_events) {
 		events = _events;
@@ -9128,12 +9126,12 @@ function Calendar_constructor(element, overrides) {
 			header.enableButton('today');
 		}
 	}
-
+	
 
 
 	/* Selection
 	-----------------------------------------------------------------------------*/
-
+	
 
 	// this public method receives start/end dates in any format, with any timezone
 	function select(zonedStartInput, zonedEndInput) {
@@ -9141,56 +9139,56 @@ function Calendar_constructor(element, overrides) {
 			t.buildSelectSpan.apply(t, arguments)
 		);
 	}
-
+	
 
 	function unselect() { // safe to be called before renderView
 		if (currentView) {
 			currentView.unselect();
 		}
 	}
-
-
-
+	
+	
+	
 	/* Date
 	-----------------------------------------------------------------------------*/
-
-
+	
+	
 	function prev() {
 		date = currentView.computePrevDate(date);
 		renderView();
 	}
-
-
+	
+	
 	function next() {
 		date = currentView.computeNextDate(date);
 		renderView();
 	}
-
-
+	
+	
 	function prevYear() {
 		date.add(-1, 'years');
 		renderView();
 	}
-
-
+	
+	
 	function nextYear() {
 		date.add(1, 'years');
 		renderView();
 	}
-
-
+	
+	
 	function today() {
 		date = t.getNow();
 		renderView();
 	}
-
-
+	
+	
 	function gotoDate(zonedDateInput) {
 		date = t.moment(zonedDateInput).stripZone();
 		renderView();
 	}
-
-
+	
+	
 	function incrementDate(delta) {
 		date.add(moment.duration(delta));
 		renderView();
@@ -9208,8 +9206,8 @@ function Calendar_constructor(element, overrides) {
 		date = newDate.clone();
 		renderView(spec ? spec.type : null);
 	}
-
-
+	
+	
 	// for external API
 	function getDate() {
 		return t.applyTimezone(date); // infuse the calendar's timezone
@@ -9241,23 +9239,23 @@ function Calendar_constructor(element, overrides) {
 			overflow: ''
 		});
 	}
-
-
-
+	
+	
+	
 	/* Misc
 	-----------------------------------------------------------------------------*/
-
+	
 
 	function getCalendar() {
 		return t;
 	}
 
-
+	
 	function getView() {
 		return currentView;
 	}
-
-
+	
+	
 	function option(name, value) {
 		if (value === undefined) {
 			return options[name];
@@ -9267,8 +9265,8 @@ function Calendar_constructor(element, overrides) {
 			updateSize(true); // true = allow recalculation of height
 		}
 	}
-
-
+	
+	
 	function trigger(name, thisObj) { // overrides the Emitter's trigger method :(
 		var args = Array.prototype.slice.call(arguments, 2);
 
@@ -9308,13 +9306,13 @@ Calendar.defaults = {
 
 	weekNumberTitle: 'W',
 	weekNumberCalculation: 'local',
-
+	
 	//editable: false,
 
 	//nowIndicator: false,
 
 	scrollTime: '06:00:00',
-
+	
 	// event ajax
 	lazyFetching: true,
 	startParam: 'start',
@@ -9345,7 +9343,7 @@ Calendar.defaults = {
 		prevYear: 'left-double-arrow',
 		nextYear: 'right-double-arrow'
 	},
-
+	
 	// jquery-ui theming
 	theme: false,
 	themeButtonIcons: {
@@ -9359,10 +9357,10 @@ Calendar.defaults = {
 	dragOpacity: .75,
 	dragRevertDuration: 500,
 	dragScroll: true,
-
+	
 	//selectable: false,
 	unselectAuto: true,
-
+	
 	dropAccept: '*',
 
 	eventOrder: 'title',
@@ -9371,10 +9369,10 @@ Calendar.defaults = {
 	eventLimitText: 'more',
 	eventLimitClick: 'popover',
 	dayPopoverFormat: 'LL',
-
+	
 	handleWindowResize: true,
 	windowResizeDelay: 200 // milliseconds before an updateSize happens
-
+	
 };
 
 
@@ -9613,7 +9611,7 @@ FC.lang('en', Calendar.englishDefaults);
 
 function Header(calendar, options) {
 	var t = this;
-
+	
 	// exports
 	t.render = render;
 	t.removeElement = removeElement;
@@ -9623,7 +9621,7 @@ function Header(calendar, options) {
 	t.disableButton = disableButton;
 	t.enableButton = enableButton;
 	t.getViewsWithButtons = getViewsWithButtons;
-
+	
 	// locals
 	var el = $();
 	var viewsWithButtons = [];
@@ -9645,14 +9643,14 @@ function Header(calendar, options) {
 			return el;
 		}
 	}
-
-
+	
+	
 	function removeElement() {
 		el.remove();
 		el = $();
 	}
-
-
+	
+	
 	function renderSection(position) {
 		var sectionEl = $('<div class="fc-' + position + '"/>');
 		var buttonStr = options.header[position];
@@ -9813,32 +9811,32 @@ function Header(calendar, options) {
 
 		return sectionEl;
 	}
-
-
+	
+	
 	function updateTitle(text) {
 		el.find('h2').text(text);
 	}
-
-
+	
+	
 	function activateButton(buttonName) {
 		el.find('.fc-' + buttonName + '-button')
 			.addClass(tm + '-state-active');
 	}
-
-
+	
+	
 	function deactivateButton(buttonName) {
 		el.find('.fc-' + buttonName + '-button')
 			.removeClass(tm + '-state-active');
 	}
-
-
+	
+	
 	function disableButton(buttonName) {
 		el.find('.fc-' + buttonName + '-button')
 			.attr('disabled', 'disabled')
 			.addClass(tm + '-state-disabled');
 	}
-
-
+	
+	
 	function enableButton(buttonName) {
 		el.find('.fc-' + buttonName + '-button')
 			.removeAttr('disabled')
@@ -9867,8 +9865,8 @@ var eventGUID = 1;
 
 function EventManager(options) { // assumed to be a calendar
 	var t = this;
-
-
+	
+	
 	// exports
 	t.isFetchNeeded = isFetchNeeded;
 	t.fetchEvents = fetchEvents;
@@ -9881,12 +9879,12 @@ function EventManager(options) { // assumed to be a calendar
 	t.mutateEvent = mutateEvent;
 	t.normalizeEventDates = normalizeEventDates;
 	t.normalizeEventTimes = normalizeEventTimes;
-
-
+	
+	
 	// imports
 	var reportEvents = t.reportEvents;
-
-
+	
+	
 	// locals
 	var stickySource = { events: [] };
 	var sources = [ stickySource ];
@@ -9905,9 +9903,9 @@ function EventManager(options) { // assumed to be a calendar
 			}
 		}
 	);
-
-
-
+	
+	
+	
 	/* Fetching
 	-----------------------------------------------------------------------------*/
 
@@ -9917,8 +9915,8 @@ function EventManager(options) { // assumed to be a calendar
 		return !rangeStart || // nothing has been fetched yet?
 			start < rangeStart || end > rangeEnd; // is part of the new range outside of the old range?
 	}
-
-
+	
+	
 	function fetchEvents(start, end) {
 		rangeStart = start;
 		rangeEnd = end;
@@ -9930,8 +9928,8 @@ function EventManager(options) { // assumed to be a calendar
 			fetchEventSource(sources[i], fetchID);
 		}
 	}
-
-
+	
+	
 	function fetchEventSource(source, fetchID) {
 		_fetchEventSource(source, function(eventInputs) {
 			var isArraySource = $.isArray(source.events);
@@ -9967,8 +9965,8 @@ function EventManager(options) { // assumed to be a calendar
 			}
 		});
 	}
-
-
+	
+	
 	function _fetchEventSource(source, callback) {
 		var i;
 		var fetchers = FC.sourceFetchers;
@@ -10077,12 +10075,12 @@ function EventManager(options) { // assumed to be a calendar
 			}
 		}
 	}
-
-
-
+	
+	
+	
 	/* Sources
 	-----------------------------------------------------------------------------*/
-
+	
 
 	function addEventSource(sourceInput) {
 		var source = buildEventSource(sourceInput);
@@ -10164,9 +10162,9 @@ function EventManager(options) { // assumed to be a calendar
 		) ||
 		source; // the given argument *is* the primitive
 	}
-
-
-
+	
+	
+	
 	/* Manipulation
 	-----------------------------------------------------------------------------*/
 
@@ -10208,7 +10206,7 @@ function EventManager(options) { // assumed to be a calendar
 		return !/^_|^(id|allDay|start|end)$/.test(name);
 	}
 
-
+	
 	// returns the expanded events that were created
 	function renderEvent(eventInput, stick) {
 		var abstractEvent = buildEventFromInput(eventInput);
@@ -10237,8 +10235,8 @@ function EventManager(options) { // assumed to be a calendar
 
 		return [];
 	}
-
-
+	
+	
 	function removeEvents(filter) {
 		var eventID;
 		var i;
@@ -10267,8 +10265,8 @@ function EventManager(options) { // assumed to be a calendar
 
 		reportEvents(cache);
 	}
-
-
+	
+	
 	function clientEvents(filter) {
 		if ($.isFunction(filter)) {
 			return $.grep(cache, filter);
@@ -10281,9 +10279,9 @@ function EventManager(options) { // assumed to be a calendar
 		}
 		return cache; // else, return all
 	}
-
-
-
+	
+	
+	
 	/* Event Normalization
 	-----------------------------------------------------------------------------*/
 

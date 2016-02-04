@@ -5474,14 +5474,18 @@ DayGrid.mixin({
         // render an `.el` on each seg
         // returns a subset of the segs. segs that were actually rendered
         var days = this.el.find('.fc-day-number');
+        var klass = "";
 
+        days.removeClass('fc-event-present fc-event-one-day fc-event-start fc-event-end booked disable');
         for (var i = segs.length - 1; i >= 0; i--) {
             var cell = segs[i];
             if (cell.leftCol == cell.rightCol) {
-                days.eq(cell.row * this.colCnt + cell.leftCol).addClass('fc-event-present fc-event-one-day');
+                klass = 'fc-event-present fc-event-one-day';
+                klass += ' ' + cell.event.className.join(' ');
+                days.eq(cell.row * this.colCnt + cell.leftCol).addClass(klass);
             } else {
                 for (var j = cell.rightCol; j >= cell.leftCol; j--) {
-                    var klass = 'fc-event-present';
+                    klass = 'fc-event-present';
                     klass += ' ' + cell.event.className.join(' ');
                     if (cell.leftCol == j) {
                         klass += ' fc-event-start';
